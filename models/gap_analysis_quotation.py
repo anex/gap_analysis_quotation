@@ -65,6 +65,10 @@ class gap_analysis_quotation_conf(osv.osv):
 
     def get_quotation_product(self, cr, uid, context=None):
         record = self.search(cr, uid, [], context=context)
+
+        if not record:
+            raise osv.except_osv(_('Error'), _('Product template not defined on Gap Analysis Configuration'))
+
         return self.browse(cr, uid, record[0], context=context).product_id.id
 
     _columns = {
