@@ -1,0 +1,4 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_gap_analysis_quotation_conf_Guser,gap_analysis_quotation_conf user,model_gap_analysis_quotation_conf,gap_analysis.res_group_gap0,1,1,0,0
+access_gap_analysis__quotation_conf_manager,gap_analysis_quotation_conf manager,model_gap_analysis_quotation_conf,gap_analysis.res_group_gap1,1,1,1,1
+access_gap_analysis_quotation_conf_user,gap_analysis_quotation_conf base user,model_gap_analysis_quotation_conf,base.group_user,1,0,0,0
