@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>
+		<record id="gap_to_quotation_form" model="ir.ui.view">
+            <field name="name">gap_to_quotation_form</field>
+            <field name="model">gap_analysis</field>
+            <field name="inherit_id" ref="gap_analysis.view_gap_analysis_form"/>
+            <field name="arch" type="xml">
+                <button name="button_dummy" position="after">
+                    <button string="Generate Quotation" icon="gtk-ok" type="object" name="gap_to_quotation" groups="gap_analysis.res_group_gap0,gap_analysis.res_group_gap1"/>
+                </button>
+            </field>
+        </record>
+
+        <record id="gap_analysis_quotation_conf_tree" model="ir.ui.view">
+            <field name="name">gap_analysis_quotation_conf_tree</field>
+            <field name="model">gap_analysis.quotation.conf</field>
+            <field name="arch" type="xml">
+                <tree string="Gap Analysis Quotation Configuration">
+                    <field name="product_id"/>
+                </tree>
+            </field>
+        </record>
+
+        <record id="gap_analysis_quotation_conf_form" model="ir.ui.view">
+            <field name="name">gap_analysis_quotation_conf_form</field>
+            <field name="model">gap_analysis.quotation.conf</field>
+            <field name="arch" type="xml">
+                <form string="Gap Analysis Quotation Configuration">
+                    <field name="product_id"/>
+                </form>
+            </field>
+        </record>
+
+        <record id="gap_analysis_quotation_action" model="ir.actions.act_window">
+            <field name="name">Gap Analysis Quotation Configuration</field>
+            <field name="res_model">gap_analysis.quotation.conf</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+        </record>
+
+        <menuitem id="gap_analysis_conf_menu" name="Gap Analysis" parent="base.menu_config"/>
+        <menuitem id="gap_analysis_quotation_conf_menu" name="Quotation Product" parent="gap_analysis_conf_menu" action="gap_analysis_quotation_action" groups="gap_analysis.res_group_gap0,gap_analysis.res_group_gap1"/>
+    </data>
+</openerp>
