@@ -32,9 +32,19 @@ class gap_analysis(osv.osv):
             'client_order_ref': gap.reference,
             'user_id': context.get('uid'),
             'pricelist_id': 1,
-            'picking_policy': 'direct',
-            'order_policy': 'manual',
         }
+
+        so_defaults = sale_order_obj.default_get(
+                                         cr,
+                                         uid,
+                                         [
+                                          'picking_policy',
+                                          'order_policy'
+                                         ],
+                                         context=context
+                                     )
+
+        vals.update(so_defaults)
 
         order_id = sale_order_obj.search(cr, uid, [('name', '=', order_name)], context=context)
 
@@ -51,9 +61,19 @@ class gap_analysis(osv.osv):
                 'product_id': gap_quot_product,
                 'name': gap_line.functionality.name,
                 'price_unit': gap_line.total_cost, 
-                'product_uom_qty': 1,
                 'order_id': order_id,
             }
+
+            sol_defaults = sale_order_line_obj.default_get(
+                                             cr,
+                                             uid,
+                                             [
+                                                'product_uom_qty',
+                                             ],
+                                             context=context
+                                         )
+
+            line_vals.update(sol_defaults)
 
             line_id = sale_order_line_obj.create(cr, uid, line_vals, context=context)
 
