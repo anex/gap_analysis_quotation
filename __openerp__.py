@@ -26,6 +26,7 @@ This product will be use like product template for convert the Gap Analysis Func
     'data': [
         'security/ir.model.access.csv',
         'views/gap_analysis_quotation.xml',
+        'wizard/wizard_gap_analysis_quotation_view.xml',
     ],
     'active': True,
 }

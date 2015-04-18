@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <openerp>
     <data>
-		<record id="gap_to_quotation_form" model="ir.ui.view">
+        <record id="gap_to_quotation_form" model="ir.ui.view">
             <field name="name">gap_to_quotation_form</field>
             <field name="model">gap_analysis</field>
             <field name="inherit_id" ref="gap_analysis.view_gap_analysis_form"/>
             <field name="arch" type="xml">
                 <button name="button_dummy" position="after">
-                    <button string="Generate Quotation" icon="gtk-ok" type="object" name="gap_to_quotation" groups="gap_analysis.res_group_gap0,gap_analysis.res_group_gap1"/>
+                    <button string="Generate Quotation" icon="gtk-ok" type="action" name="%(action_wizard_gap_analysis_quotation)d" groups="gap_analysis.res_group_gap0,gap_analysis.res_group_gap1"/>
                 </button>
             </field>
         </record>

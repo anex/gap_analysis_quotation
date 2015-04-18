@@ -7,14 +7,11 @@ from tools.translate import _
 class gap_analysis(osv.osv):
     _inherit = 'gap_analysis'
 
-    def gap_to_quotation(self, cr, uid, ids, context=None):
+    def gap_to_quotation(self, cr, uid, ids, product_id, product_uom, include_workloads, context=None):
         sale_order_obj = self.pool.get('sale.order')
         sale_order_line_obj = self.pool.get('sale.order.line')
 
-        gap_quot_conf_obj = self.pool.get('gap_analysis.quotation.conf')
-        gap_quot_product = gap_quot_conf_obj.get_quotation_product(cr, uid, context=context)
-
-        gap = self.browse(cr, uid, ids, context=context)[0]
+        gap = self.browse(cr, uid, ids, context=context)
 
         if not gap.partner_id:
             raise osv.except_osv(_('Error'), _('Must be add a Partner to Generate Quotation'))
@@ -57,27 +54,66 @@ class gap_analysis(osv.osv):
             order_id = sale_order_obj.create(cr, uid, vals, context=context)
 
         for gap_line in gap.gap_lines:
-            line_vals = {
-                'product_id': gap_quot_product,
-                'name': gap_line.functionality.name,
-                'price_unit': gap_line.total_cost, 
-                'order_id': order_id,
-            }
 
-            sol_defaults = sale_order_line_obj.default_get(
-                                             cr,
-                                             uid,
-                                             [
-                                                'product_uom_qty',
-                                             ],
-                                             context=context
-                                         )
+            if include_workloads:
+                if gap_line.workloads:
+                    for workload in gap_line.workloads:
+                        if workload.type.category == "Technical Analysis":
+                            workload_cost = gap.tech_cost
+                        else:
+                            workload_cost = gap.func_cost
 
-            line_vals.update(sol_defaults)
+                        workload_line_vals = {
+                            'product_id': product_id,
+                            'name': workload.type.name,
+                            'price_unit': workload_cost,
+                            'order_id': order_id,
+                            'product_uom_qty': workload.duration,
+                            'product_uom': product_uom,
+                        }
 
-            line_id = sale_order_line_obj.create(cr, uid, line_vals, context=context)
+                        line_id = sale_order_line_obj.create(cr, uid, workload_line_vals, context=context)
 
-        return True
+                    line_vals = {
+                        'product_id': product_id,
+                        'name': gap_line.functionality.name,
+                        'price_unit': (gap.dev_cost + gap.tech_cost) / 2,
+                        'order_id': order_id,
+                        'product_uom_qty': gap_line.effort.duration + gap_line.testing,
+                        'product_uom': product_uom,
+                    }
+
+                    line_id = sale_order_line_obj.create(cr, uid, line_vals, context=context)
+            else:
+                workloads_durations = 0
+
+                if gap_line.workloads:
+                    workloads_durations = sum(map(lambda workload: workload.duration, gap_line.workloads))
+
+                line_vals = {
+                    'product_id': product_id,
+                    'name': gap_line.functionality.name,
+                    'price_unit': gap_line.total_cost / gap_line.total_time,
+                    'order_id': order_id,
+                    'product_uom_qty': gap_line.total_time,
+                    'product_uom': product_uom,
+                }
+
+                line_id = sale_order_line_obj.create(cr, uid, line_vals, context=context)
+
+        return {
+            'name': _('Quotation'),
+            'view_type': 'form',
+            'view_mode': 'tree, form',
+            'res_model': 'sale.order',
+            'res_id': order_id,
+            'view_id': False,
+            'views': [(False, 'form'),
+                      (False, 'tree'),],
+            'type': 'ir.actions.act_window',
+        }
+
+
 gap_analysis()
 
 class gap_analysis_quotation_conf(osv.osv):
@@ -86,10 +122,10 @@ class gap_analysis_quotation_conf(osv.osv):
     def get_quotation_product(self, cr, uid, context=None):
         record = self.search(cr, uid, [], context=context)
 
-        if not record:
-            raise osv.except_osv(_('Error'), _('Product template not defined on Gap Analysis Configuration'))
-
-        return self.browse(cr, uid, record[0], context=context).product_id.id
+        if record:
+            return self.browse(cr, uid, record[0], context=context).product_id.id
+        else:
+            return False
 
     _columns = {
         'product_id': fields.many2one('product.product', 'Product', select=1, required=False),
